@@ -1,17 +1,70 @@
 var express = require('express');
-var http = require('http');
-
 var app = express();
 
 app.get('/hello', function(req, res) {
   if (req.query.name === "Jhon") {
-    //console.log("Heloo Jhon!");
     res.send("<h1>Hello Jhon!</h1>")
   }
-  else {
-    //console.log(req.query);
+    else {
     res.send(`<h1>Hello World!</h1>`);
   }
+});
+
+app.get('/calculator/:operation', function(req, res) {
+  var value1 = parseInt(req.query.num1);
+  var value2 = parseInt(req.query.num2);
+
+  if ((req.query.num1 === undefined) || ((req.query.num1 === ''))) {value1 = 0};
+  if ((req.query.num2 === undefined) || ((req.query.num2 === ''))) {value2 = 0};
+  
+  var solution;
+    switch(req.params.operation) {
+    case 'add':
+      solution = value1 + value2;
+      break;
+    case 'multiply':
+      solution = value1 * value2;
+      break;
+    default:
+      res.end("400 Bad Request");
+  };
+    
+    var solutionObject = {
+      operation: req.params.operation,
+      firstOperand: req.query.num1,
+      secondOperand: req.query.num2,
+      solution: solution
+    };
+    
+    res.end(JSON.stringify(solutionObject, null, 2));
+
+  // if (req.params.operation === 'add') {
+
+  //   var sum = value1 + value2;
+
+  //   res.setHeader('200', 'Success');
+  //   res.end(`{
+  //     "operation": "add",
+  //     "firstOperand": ${value1},
+  //     "secondOperand": ${value2},
+  //     "solution": ${sum}
+  //   }`);
+  // }
+  // if (req.params.operation === 'multiply') {
+
+  //   var multiply = value1 * value2;
+
+  //   res.setHeader('200', 'Success');
+  //   res.end(`{
+  //     "operation": "multiply",
+  //     "firstOperand": ${value1},
+  //     "secondOperand": ${value2},
+  //     "solution": ${multiply}
+  //   }`);
+  // }
+  // else {
+  //   res.status(400).send('Bad request!');
+  // }
 });
 
 
