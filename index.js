@@ -3,8 +3,15 @@ var http = require('http');
 
 var app = express();
 
-app.get('/hello', function (req, res) {
-  res.send(`<h1>Hello World!</h1>`);
+app.get('/hello', function(req, res) {
+  if (req.query.name === "Jhon") {
+    //console.log("Heloo Jhon!");
+    res.send("<h1>Hello Jhon!</h1>")
+  }
+  else {
+    //console.log(req.query);
+    res.send(`<h1>Hello World!</h1>`);
+  }
 });
 
 
