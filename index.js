@@ -7,7 +7,7 @@ var mysql = require('promise-mysql');
 var bodyParser = require('body-parser');
 var app = express();
 
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 //Exercises 1,2
 app.get('/hello', function(req, res) {
@@ -99,10 +99,32 @@ app.get('/new-post', function(request, response) {
     </p>
     <button type="submit">Create!</button>
   </form>`;
-  response.end(formHTML);
+  response.send(formHTML);
 });
 
+app.post('/createPost', urlencodedParser, function(request, response) {
+  if (request.body) {
+    var connection = mysql.createPool({
+      host     : 'localhost',
+      user     : 'root',
+      password : '',
+      database: 'reddit',
+      connectionLimit: 10
+    });
 
+    // create a RedditAPI object. we will use it to insert new data
+    var myReddit = new RedditAPI(connection);
+    var myPost = {
+      subredditId: 15,
+      userId: 1,
+      title: request.body.title,
+      url: request.body.url
+    };
+    console.log(myPost);
+   myReddit.createPost('blah')
+    .then(response.redirect('/posts'));
+  }
+});
 
 
 //example of listening http://decodemtl-tamyr.c9users.io/
