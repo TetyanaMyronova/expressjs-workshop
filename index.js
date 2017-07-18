@@ -4,7 +4,10 @@ var express = require('express');
 var RedditAPI = require('../reddit-nodejs-api/reddit');
 var request = require('request-promise');
 var mysql = require('promise-mysql');
+var bodyParser = require('body-parser');
 var app = express();
+
+var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 //Exercises 1,2
 app.get('/hello', function(req, res) {
@@ -46,6 +49,7 @@ app.get('/calculator/:operation', function(req, res) {
     res.end(JSON.stringify(solutionObject, null, 2));
 });
 
+//Get all posts (create a connection)
 app.get('/posts', function(request, response) {
   var connection = mysql.createPool({
     host     : 'localhost',
@@ -62,6 +66,7 @@ app.get('/posts', function(request, response) {
     <h1>List of posts</h1>
     <ul class="posts-list">
   `;
+  //get all posts and create a new li per each post
   myReddit.getAllPosts()
   .then(dbPosts => {
     dbPosts.forEach(post => {
@@ -78,9 +83,26 @@ app.get('/posts', function(request, response) {
     myHTMLString += `
     </ul>
     </div>`;
-    response.end(myHTMLString);
+    response.send(myHTMLString);
   });
 });
+
+//Exercise 5: Creating a "new post" HTML form
+app.get('/new-post', function(request, response) {
+  var formHTML = `<!DOCTYPE html>
+  <form action="/createPost" method="POST"><!-- why does it say method="POST" ?? -->
+    <p>
+      <input type="text" name="url" placeholder="Enter a URL to content">
+    </p>
+    <p>
+      <input type="text" name="title" placeholder="Enter the title of your content">
+    </p>
+    <button type="submit">Create!</button>
+  </form>`;
+  response.end(formHTML);
+});
+
+
 
 
 //example of listening http://decodemtl-tamyr.c9users.io/
