@@ -5,9 +5,14 @@ var RedditAPI = require('../reddit-nodejs-api/reddit');
 var request = require('request-promise');
 var mysql = require('promise-mysql');
 var bodyParser = require('body-parser');
+var pug = require('pug');
 var app = express();
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false });
+
+app.set('view engine', 'pug');
+
+app.use('/files', express.static('static_files'));
 
 //Exercises 1,2
 app.get('/hello', function(req, res) {
@@ -93,6 +98,21 @@ app.get('/posts', function(request, response) {
   });
 });
 
+app.get('/post-list', function (request, response) {
+  var connection = mysql.createPool({
+    host     : 'localhost',
+    user     : 'root',
+    password : '',
+    database: 'reddit',
+    connectionLimit: 10
+  });
+  var myReddit = new RedditAPI(connection);
+  myReddit.getAllPosts()
+  .then(posts => {
+    response.render('post-list', {posts: posts});
+  });
+});
+
 //Exercise 5: Creating a "new post" HTML form
 app.get('/new-post', function(request, response) {
   var formHTML = `<!DOCTYPE html>
@@ -106,6 +126,10 @@ app.get('/new-post', function(request, response) {
     <button type="submit">Create!</button>
   </form>`;
   response.send(formHTML);
+});
+
+app.get('/createContent', function(request, response) {
+  response.render('create-content');
 });
 
 app.post('/createPost', urlencodedParser, function(request, response) {
