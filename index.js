@@ -1,6 +1,12 @@
+'use strict';
+
 var express = require('express');
+var RedditAPI = require('../reddit-nodejs-api/reddit');
+var request = require('request-promise');
+var mysql = require('promise-mysql');
 var app = express();
 
+//Exercises 1,2
 app.get('/hello', function(req, res) {
   if (req.query.name === "Jhon") {
     res.send("<h1>Hello Jhon!</h1>")
@@ -10,6 +16,7 @@ app.get('/hello', function(req, res) {
   }
 });
 
+//Exercise 3
 app.get('/calculator/:operation', function(req, res) {
   var value1 = parseInt(req.query.num1);
   var value2 = parseInt(req.query.num2);
@@ -37,34 +44,42 @@ app.get('/calculator/:operation', function(req, res) {
     };
     
     res.end(JSON.stringify(solutionObject, null, 2));
+});
 
-  // if (req.params.operation === 'add') {
+app.get('/posts', function(request, response) {
+  var connection = mysql.createPool({
+    host     : 'localhost',
+    user     : 'root',
+    password : '',
+    database: 'reddit',
+    connectionLimit: 10
+  });
 
-  //   var sum = value1 + value2;
-
-  //   res.setHeader('200', 'Success');
-  //   res.end(`{
-  //     "operation": "add",
-  //     "firstOperand": ${value1},
-  //     "secondOperand": ${value2},
-  //     "solution": ${sum}
-  //   }`);
-  // }
-  // if (req.params.operation === 'multiply') {
-
-  //   var multiply = value1 * value2;
-
-  //   res.setHeader('200', 'Success');
-  //   res.end(`{
-  //     "operation": "multiply",
-  //     "firstOperand": ${value1},
-  //     "secondOperand": ${value2},
-  //     "solution": ${multiply}
-  //   }`);
-  // }
-  // else {
-  //   res.status(400).send('Bad request!');
-  // }
+  // create a RedditAPI object
+  var myReddit = new RedditAPI(connection);
+  var myHTMLString = `
+  <div id="posts">
+    <h1>List of posts</h1>
+    <ul class="posts-list">
+  `;
+  myReddit.getAllPosts()
+  .then(dbPosts => {
+    dbPosts.forEach(post => {
+      myHTMLString += `
+      <li class="post-item">
+      <h2 class="post-item__title">
+      <a href=`+ post.url + `>`+ post.title + `</a>
+      </h2>
+      <p>Created by ` + post.user.name + `</p>
+      </li>`;
+    });
+  })
+  .then(result => {
+    myHTMLString += `
+    </ul>
+    </div>`;
+    response.end(myHTMLString);
+  });
 });
 
 
