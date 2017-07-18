@@ -26,6 +26,7 @@ app.get('/calculator/:operation', function(req, res) {
 
   if ((req.query.num1 === undefined) || ((req.query.num1 === ''))) {value1 = 0};
   if ((req.query.num2 === undefined) || ((req.query.num2 === ''))) {value2 = 0};
+  var op = req.params.operation;
   
   var solution;
     switch(req.params.operation) {
@@ -36,17 +37,22 @@ app.get('/calculator/:operation', function(req, res) {
       solution = value1 * value2;
       break;
     default:
-      res.end("400 Bad Request");
+      //res.end("400 Bad Request");
+      res.status(400).json({error: "Operation must be add or multiply"})
+      return;//important
   };
     
     var solutionObject = {
       operation: req.params.operation,
-      firstOperand: req.query.num1,
-      secondOperand: req.query.num2,
+      firstOperand: +req.query.num1,
+      secondOperand: +req.query.num2,
       solution: solution
+      //solution: req.params.operation === 'add' ? req.query.num1 + req.query.num2 : req.query.num1 * req.query.num2
     };
     
     res.end(JSON.stringify(solutionObject, null, 2));
+    // another way to send a JSON response
+    //res.json(response);
 });
 
 //Get all posts (create a connection)
@@ -120,8 +126,7 @@ app.post('/createPost', urlencodedParser, function(request, response) {
       title: request.body.title,
       url: request.body.url
     };
-    console.log(myPost);
-   myReddit.createPost('blah')
+   myReddit.createPost(myPost)
     .then(response.redirect('/posts'));
   }
 });
